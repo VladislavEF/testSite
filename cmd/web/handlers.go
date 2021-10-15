@@ -1,8 +1,9 @@
 package main
 
 import (
-	"log"
+	"fmt"
 	"net/http"
+	"strconv"
 )
 
 // Главная страница
@@ -16,9 +17,16 @@ func home(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Привет из Snippetbox"))
 }
 
-// Отображение содержимого заметки
+// Заметки
 func showSnippet(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Отображение заметки..."))
+
+	id, err := strconv.Atoi(r.URL.Query().Get("id"))
+	if err != nil || id < 1 {
+		http.NotFound(w, r)
+		return
+	}
+
+	fmt.Fprintf(w, "Отображение выбранной заметки с ID %d...", id)
 }
 
 // Обработчик для создания новой заметки
@@ -30,16 +38,4 @@ func createSnippet(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Write([]byte("Создание новой заметки..."))
-}
-
-func main() {
-
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", home)
-	mux.HandleFunc("/snippet", showSnippet)
-	mux.HandleFunc("/snippet/create", createSnippet)
-
-	log.Println("Запуск веб сервера на http://127.0.0.1:4000")
-	err := http.ListenAndServe(":4000", mux)
-	log.Fatal(err)
 }
